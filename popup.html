@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Live Sinhala Subtitles</title>
+  <style>
+    /* ==========================================================================
+       Dark Mode Design System & Tokens
+       ========================================================================== */
+    :root {
+      --bg-primary: #0e1118;
+      --bg-card: rgba(23, 27, 38, 0.7);
+      --bg-card-hover: rgba(30, 36, 51, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(255, 235, 59, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-red: #eb0f19;
+      --accent-red-glow: rgba(235, 15, 25, 0.4);
+      --accent-gold: #ffeb3b;
+      --accent-gold-glow: rgba(255, 235, 59, 0.35);
+      --accent-blue: #38bdf8;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Sinhala", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 380px;
+      min-height: 560px;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-full);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Container */
+    .popup-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #eb0f19, #b0000a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--accent-red-glow);
+    }
+
+    .brand-icon img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .brand-text h1 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge-v {
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(255, 235, 59, 0.15);
+      color: var(--accent-gold);
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 235, 59, 0.3);
+    }
+
+    /* Master Switch Card */
+    .master-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(30, 36, 52, 0.7), rgba(20, 24, 36, 0.85));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .master-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .master-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .status-dot.inactive {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    .master-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Switch Component */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-red);
+      border-color: rgba(255, 235, 59, 0.4);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: #ffffff;
+    }
+
+    /* Live Preview Section */
+    .preview-card {
+      background: #06080d;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-header {
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .preview-stage {
+      position: relative;
+      height: 94px;
+      background: linear-gradient(180deg, #181d29 0%, #0d1017 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .preview-mock-video {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .preview-sub-box {
+      position: relative;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 90%;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-sub-en {
+      font-size: 11px;
+      color: #e2e8f0;
+      margin-bottom: 2px;
+      opacity: 0.9;
+      display: none;
+    }
+
+    .preview-sub-si {
+      font-family: "Noto Sans Sinhala", "Iskoola Pota", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--accent-gold);
+    }
+
+    /* Form Section Cards */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* Segmented Control / Pill Tabs */
+    .segmented-control {
+      display: flex;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .segmented-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .segmented-btn.active {
+      background: var(--accent-red);
+      color: #ffffff;
+      box-shadow: 0 2px 6px var(--accent-red-glow);
+    }
+
+    /* Control Rows & Sliders */
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .control-val-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-gold);
+      background: rgba(255, 235, 59, 0.1);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 235, 59, 0.2);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: #252d3d;
+      border-radius: var(--radius-full);
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-gold-glow);
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+
+    /* Swatches & Color Row */
+    .color-grid {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.15);
+    }
+
+    .color-swatch.active {
+      border-color: #ffffff;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+    }
+
+    .color-picker-wrapper {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    .color-picker-input {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    /* Checkbox Rows */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-red);
+      cursor: pointer;
+    }
+
+    /* Dropdown / Select */
+    select {
+      background: rgba(15, 18, 26, 0.9);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    select:focus {
+      border-color: var(--accent-gold);
+    }
+
+    /* Action Buttons */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn.danger:hover {
+      background: rgba(235, 15, 25, 0.15);
+      border-color: var(--accent-red);
+      color: #ff8a80;
+    }
+
+    /* Information / Tips Banner */
+    .tip-banner {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 11px;
+      color: #bae6fd;
+      line-height: 1.4;
+    }
+
+    .tip-banner .tip-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 10px 0 2px 0;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .footer .powered-by {
+      font-size: 11px;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .footer .brand-highlight {
+      color: var(--accent-gold);
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-shadow: 0 0 8px var(--accent-gold-glow);
+    }
+
+    .footer .copyright {
+      font-size: 10px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="icons/icon48.png" alt="Logo" />
+        </div>
+        <div class="brand-text">
+          <h1>YouTube Sinhala <span class="badge-v">v1.0</span></h1>
+          <p>Real-Time Caption Translator</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Master Enable Switch -->
+    <div class="master-card">
+      <div class="master-info">
+        <div class="master-title">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="masterStatusText">Sinhala Subtitles Active</span>
+        </div>
+        <span class="master-desc">Instant real-time translation overlay</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="masterToggle" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Live Preview Stage -->
+    <div class="preview-card">
+      <div class="preview-header">
+        <span>Live Overlay Preview</span>
+        <span id="previewModeLabel">Sinhala Only</span>
+      </div>
+      <div class="preview-stage">
+        <div class="preview-mock-video"></div>
+        <div class="preview-sub-box" id="previewSubBox">
+          <div class="preview-sub-en" id="previewSubEn">Welcome to this YouTube video!</div>
+          <div class="preview-sub-si" id="previewSubSi">මෙම යූටියුබ් වීඩියෝවට ඔබව සාදරයෙන් පිළිගනිමු!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtitle Mode Selector -->
+    <div class="section-card">
+      <span class="section-title">Subtitle Display Mode</span>
+      <div class="segmented-control">
+        <button class="segmented-btn active" id="modeSiOnly">Sinhala Only</button>
+        <button class="segmented-btn" id="modeDual">Dual (English + Sinhala)</button>
+      </div>
+    </div>
+
+    <!-- Typography & Visual Controls -->
+    <div class="section-card">
+      <span class="section-title">Visual Styling</span>
+
+      <!-- Font Size Slider -->
+      <div class="control-row">
+        <div class="control-label">
+          <span>Subtitle Font Size</span>
+          <span class="control-val-badge" id="fontSizeBadge">24px</span>
+        </div>
+        <input type="range" id="fontSizeSlider" min="16" max="38" step="1" value="24" />
+      </div>
+
+      <!-- Background Opacity Slider -->
+      <div class="control-row">
+        <div class="control-label">
+          <span>Background Opacity</span>
+          <span class="control-val-badge" id="bgOpacityBadge">80%</span>
+        </div>
+        <input type="range" id="bgOpacitySlider" min="0" max="100" step="5" value="80" />
+      </div>
+
+      <!-- Sinhala Text Color -->
+      <div class="control-row">
+        <div class="control-label">
+          <span>Sinhala Text Color</span>
+        </div>
+        <div class="color-grid">
+          <div class="color-swatch active" data-color="#FFEB3B" style="background: #FFEB3B;" title="Vibrant Gold/Yellow"></div>
+          <div class="color-swatch" data-color="#FFFFFF" style="background: #FFFFFF;" title="Pure White"></div>
+          <div class="color-swatch" data-color="#00E5FF" style="background: #00E5FF;" title="Neon Cyan"></div>
+          <div class="color-swatch" data-color="#69F0AE" style="background: #69F0AE;" title="Mint Green"></div>
+          <div class="color-swatch" data-color="#FF8A80" style="background: #FF8A80;" title="Soft Coral"></div>
+          <div class="color-picker-wrapper" title="Custom Color Picker">
+            <input type="color" id="customTextColorPicker" class="color-picker-input" value="#FFEB3B" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Background Box Color -->
+      <div class="control-row">
+        <div class="control-label">
+          <span>Background Color</span>
+        </div>
+        <div class="color-grid">
+          <div class="color-swatch active" data-bgcolor="#0d0f17" style="background: #0d0f17;" title="Dark Slate"></div>
+          <div class="color-swatch" data-bgcolor="#000000" style="background: #000000;" title="Deep Black"></div>
+          <div class="color-swatch" data-bgcolor="#0b1b2b" style="background: #0b1b2b;" title="Midnight Navy"></div>
+          <div class="color-picker-wrapper" title="Custom Background Color Picker">
+            <input type="color" id="customBgColorPicker" class="color-picker-input" value="#0d0f17" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Shadow Toggle -->
+      <label class="checkbox-row">
+        <input type="checkbox" id="textShadowToggle" checked />
+        <span>Enhanced High-Contrast Text Outline & Shadow</span>
+      </label>
+    </div>
+
+    <!-- Positioning & Alignment -->
+    <div class="section-card">
+      <span class="section-title">Layout & Positioning</span>
+      <div class="control-row">
+        <div class="control-label">
+          <span>Position Preset</span>
+        </div>
+        <select id="positionSelect">
+          <option value="bottom-center">Bottom Center (Default)</option>
+          <option value="top-center">Top Center</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-right">Bottom Right</option>
+          <option value="custom">Custom (User Dragged)</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="action-btn" id="resetPositionBtn">
+          <span>↺</span> Reset to Default Position
+        </button>
+      </div>
+    </div>
+
+    <!-- Performance & Sync Settings -->
+    <div class="section-card">
+      <span class="section-title">Translation & Synchronization</span>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>Video Caption Language (වීඩියෝවේ භාෂාව)</span>
+        </div>
+        <select id="sourceLangSelect">
+          <option value="auto" selected>🌐 Auto Detect Any Language (ස්වයංක්‍රීයව හඳුනාගන්න)</option>
+          <option value="en">English (ඉංග්‍රීසි)</option>
+          <option value="hi">Hindi (हिन्दी / හින්දි)</option>
+          <option value="ta">Tamil (தமிழ் / දෙමළ)</option>
+          <option value="ja">Japanese (日本語 / ජපන් Anime/Shows)</option>
+          <option value="ko">Korean (한국어 / කොරියානු K-Drama)</option>
+          <option value="zh-CN">Chinese (中文 / චීන)</option>
+          <option value="es">Spanish (Español / ස්පාඤ්ඤ)</option>
+          <option value="fr">French (Français / ප්‍රංශ)</option>
+          <option value="de">German (Deutsch / ජර්මන්)</option>
+          <option value="ru">Russian (Русский / රුසියානු)</option>
+          <option value="ar">Arabic (العربية / අරාබි)</option>
+          <option value="it">Italian (Italiano / ඉතාලි)</option>
+          <option value="tr">Turkish (Türkçe / තුර්කි)</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>Streaming Latency Mode</span>
+        </div>
+        <select id="latencySelect">
+          <option value="fast">Ultra Fast (100ms Debounce)</option>
+          <option value="balanced" selected>Balanced & Fluid (200ms)</option>
+          <option value="smooth">Full Phrase Stability (350ms)</option>
+        </select>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="hideNativeToggle" checked />
+        <span>Hide YouTube English captions visually</span>
+      </label>
+    </div>
+
+    <!-- Quick Tip & Diagnostics -->
+    <div class="tip-banner">
+      <span class="tip-icon">💡</span>
+      <span class="tip-text">
+        Ensure YouTube Captions (CC) are enabled on the video (or press 'C' on keyboard) so the extension can capture the English dialogue.
+      </span>
+    </div>
+
+    <!-- Cache Management -->
+    <div class="btn-row">
+      <button class="action-btn" id="clearCacheBtn">
+        <span>🗑️</span> Clear Translation Cache
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="powered-by">
+        <span>Powered by</span>
+        <strong class="brand-highlight">PTM Prime</strong>
+      </div>
+      <div class="copyright">
+        <span>&copy; 2026 PTM Prime. All rights reserved.</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
